@@ -50,26 +50,24 @@ jobs:
 
       - name: Generate Go bindings (mobileNebula.aar)
         run: |
-          # 创建 env.sh（在项目根目录，gen-artifacts.sh 能找到）
+          # ✅ 正确方式：在脚本内部扩展 $PATH
+          export PATH="/home/runner/go/bin:/opt/hostedtoolcache/go/1.22.12/x64/bin:$PATH"
+      
+          # 创建 env.sh（供 gen-artifacts.sh 使用）
           cat <<'EOF' > env.sh
           #!/bin/sh
           export GOPATH="$PWD/go"
           export PATH="$GOPATH/bin:$PATH"
           EOF
-
-          # 确保 GOPATH 目录
+      
+          # 创建 GOPATH 目录
           mkdir -p go
-
+      
           # 确保脚本可执行
           chmod +x gen-artifacts.sh
-
+      
           # 运行生成脚本
           ./gen-artifacts.sh android
-
-        env:
-          # 确保 PATH 包含 Go 和 gomobile
-          PATH: /home/runner/go/bin:/opt/hostedtoolcache/go/1.22.12/x64/bin:$PATH
-          GOPATH: /home/runner/go
 
       - name: Install dependencies
         run: flutter pub get
