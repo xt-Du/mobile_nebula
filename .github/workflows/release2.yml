@@ -41,6 +41,30 @@ jobs:
           flutter-version: "3.29.2"
           channel: "stable"
 
+      - name: Create env.sh for gen-artifacts
+        run: >
+          cat <<'EOF' > android/mobileNebula/env.sh
+          #!/bin/sh
+          export PATH="/go/bin:$PATH"
+          export GOPATH="/home/runner/go"
+          EOF
+        shell: bash
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Generate artifacts (Go bindings)
+        working-directory: android/mobileNebula
+        run: |
+          chmod +x gen-artifacts.sh
+          ./gen-artifacts.sh android
+        env:
+          PATH: /go/bin:$PATH
+          GOPATH: /home/runner/go
+
+    
       - name: Install dependencies
         run: flutter pub get
 
