@@ -50,21 +50,28 @@ jobs:
 
       - name: Generate Go bindings (mobileNebula.aar)
         run: |
-          # 安装 gomobile 到 $GOPATH/bin
+          # 1. 安装 gomobile 到 $GOPATH/bin
           go install golang.org/x/mobile/cmd/gomobile@latest
       
-          # 初始化（首次使用必须）
-          gomobile init
+          # 2. 初始化 gomobile（只需一次）
+          if [ ! -d "$HOME/.cache/gomobile" ]; then
+            gomobile init
+          fi
       
-          # 创建 env.sh
+          # 3. 创建 env.sh
           cat <<'EOF' > env.sh
           #!/bin/sh
           export GOPATH="$PWD/go"
           export PATH="$GOPATH/bin:$PATH"
           EOF
-
+      
+          # 4. 创建 GOPATH 目录
           mkdir -p go
+      
+          # 5. 确保脚本可执行
           chmod +x gen-artifacts.sh
+      
+          # 6. 运行生成脚本
           ./gen-artifacts.sh android
 
       - name: Install dependencies
