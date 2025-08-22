@@ -1,7 +1,7 @@
 name: Build Android APK
 
 on:
-  workflow_dispatch:  # 允许手动点击触发
+  workflow_dispatch:
     inputs:
       build_name:
         description: 'App版本名，如 1.0.0'
@@ -28,6 +28,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          submodules: true  # 如果 nebula 是子模块，请确保拉取
 
       - name: Setup Java
         uses: actions/setup-java@v4
@@ -41,40 +43,41 @@ jobs:
           flutter-version: "3.29.2"
           channel: "stable"
 
-      - name: Create env.sh for gen-artifacts
-        run: >
-          cat <<'EOF' > android/mobileNebula/env.sh
-          #!/bin/sh
-          export PATH="/go/bin:$PATH"
-          export GOPATH="/home/runner/go"
-          EOF
-        shell: bash
-
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
           go-version: '1.22'
 
-      - name: Generate artifacts (Go bindings)
-        working-directory: android/mobileNebula
+      - name: Generate Go bindings (mobileNebula.aar)
         run: |
+          # 创建 env.sh（在项目根目录，gen-artifacts.sh 能找到）
+          cat <<'EOF' > env.sh
+          #!/bin/sh
+          export GOPATH="$PWD/go"
+          export PATH="$GOPATH/bin:$PATH"
+          EOF
+
+          # 确保 GOPATH 目录
+          mkdir -p go
+
+          # 确保脚本可执行
           chmod +x gen-artifacts.sh
+
+          # 运行生成脚本
           ./gen-artifacts.sh android
+
         env:
-          PATH: /go/bin:$PATH
+          # 确保 PATH 包含 Go 和 gomobile
+          PATH: /home/runner/go/bin:/opt/hostedtoolcache/go/1.22.12/x64/bin:$PATH
           GOPATH: /home/runner/go
 
-    
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Extract version from tag
+      - name: Set build name and number from input
         run: |
-          VERSION_TAG="${GITHUB_REF#refs/tags/}"
-          BUILD_NAME="${VERSION_TAG%-*}"
-          BUILD_NUMBER="1"
-          echo "BUILD_NAME=$BUILD_NAME" >> $GITHUB_ENV
-          echo "BUILD_NUMBER=$BUILD_NUMBER" >> $GITHUB_ENV
+          echo "BUILD_NAME=${{ inputs.build_name }}" >> $GITHUB_ENV
+          echo "BUILD_NUMBER=${{ inputs.build_number }}" >> $GITHUB_ENV
 
       - name: Set keystore path
         run: |
