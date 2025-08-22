@@ -3,6 +3,7 @@ package mobileNebula
 type config struct {
 	PKI           configPKI           `yaml:"pki"`
 	StaticHostmap map[string][]string `yaml:"static_host_map"`
+	StaticMap     map[string]string   `yaml:"static_map"`
 	Lighthouse    configLighthouse    `yaml:"lighthouse"`
 	Listen        configListen        `yaml:"listen"`
 	Punchy        configPunchy        `yaml:"punchy"`
@@ -25,6 +26,9 @@ func newConfig() *config {
 			Blacklist: []string{},
 		},
 		StaticHostmap: map[string][]string{},
+		StaticMap: map[string]string{
+			"network": "ip6", 
+		},
 		Lighthouse: configLighthouse{
 			DNS:      configDNS{},
 			Interval: 60,
