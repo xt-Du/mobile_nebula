@@ -98,6 +98,9 @@ jobs:
             --release \
             --build-name=$BUILD_NAME \
             --build-number=$BUILD_NUMBER
+        env:
+          GOOGLE_PLAY_KEYSTORE_PASSWORD: ${{ secrets.GOOGLE_PLAY_KEYSTORE_PASSWORD }}
+          GOOGLE_PLAY_KEYSTORE_PATH: $RUNNER_TEMP/upload-keystore.jks
 
       - name: Upload APK as artifact
         uses: actions/upload-artifact@v4
