@@ -45,10 +45,12 @@ android {
 
     signingConfigs {
         release {
-            keyAlias 'key'
-            storeFile System.getenv('GOOGLE_PLAY_KEYSTORE_PATH') ? file(System.getenv('GOOGLE_PLAY_KEYSTORE_PATH')) : null
-            keyPassword System.getenv('GOOGLE_PLAY_KEYSTORE_PASSWORD')
-            storePassword System.getenv('GOOGLE_PLAY_KEYSTORE_PASSWORD')
+            Properties properties = new Properties()
+            properties.load(new FileInputStream(file('../key.properties')))
+            keyAlias properties['keyAlias']
+            keyPassword properties['keyPassword']
+            storeFile file(properties['storeFile'])  // 绝对路径，不会错
+            storePassword properties['storePassword']
         }
     }
 
